@@ -25,7 +25,7 @@ const userController = {
       res.status(500).json(error);
     }
   },
-  
+
   async createUser(req, res) {
     try {
       const user = await User.create(req.body);
@@ -34,7 +34,30 @@ const userController = {
       res.status(500).json(error);
     }
   },
-  
+
+  async updateUser(req, res) {
+    try {
+      const user = await User.findOneAndUpdate(
+        {
+          _id: req.params.userId,
+        },
+        {
+          $set: req.body,
+        },
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
+      if (!user) {
+        return res.status(404).json("no user with that ID");
+      }
+      res.json(user);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
+
   async deleteUser(req, res) {
     try {
       const user = await User.findOneAndRemove({
@@ -53,7 +76,7 @@ const userController = {
 
       if (!thought) {
         return res.status(404).json({
-          message: "Student deleted, but no thoughts found",
+          message: "User deleted, but no thoughts found",
         });
       }
 
@@ -63,47 +86,6 @@ const userController = {
       res.status(500).json(error);
     }
   },
-
- 
-  async addReaction(req, res) {
-    try {
-      console.log("You have added a reaction");
-      console.log(req.body);
-      const user = await User.findOneAndUpdate(
-        { _id: req.params.userId },
-        { $addToSet: { reaction: req.body } },
-        { runValidators: true, new: true }
-      );
-
-      if (!user) {
-        return res
-          .status(404)
-          .json({ message: "No user found with that ID" });
-      }
-
-      res.json(user);
-    } catch (error) {
-      res.status(500).json(error);
-    }
-  },
-  
-  async removeReaction(req, res) {
-    try {
-      const user = await User.findOneAndUpdate(
-        { _id: req.params.userId },
-        { $pull: { reaction: { reactionId: req.params.reactionId } } },
-        { runValidators: true, new: true }
-      );
-
-      if (!user) {
-        return res
-          .status(404)
-          .json({ message: "No user found with that ID" });
-      }
-
-      res.json(user);
-    } catch (error) {
-      res.status(500).json(error);
-    }
-  },
 };
+
+module.exports = userController;
